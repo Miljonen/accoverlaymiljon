@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accuracy Progress</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            background: transparent;
+        }
+        .overlay {
+            background: rgba(3, 9, 22, 0.99);
+            width: 450px;
+            color: #fff;
+            height: 130px;
+            font-family: "Inter", sans-serif;
+            padding: 10px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin: 20px;
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+
+        .overlay h3 {
+            font-size: 20px;
+        }
+
+        .overlay p {
+            font-weight: 500;
+            font-size: 18px;
+            margin-top: 5px;
+            opacity: 0.9;
+        }
+
+        .bar {
+            margin-top: 20px;
+            width: 100%;
+            height: 12px;
+            background: #323750;
+            border-radius: 20px;
+        }
+
+        .progress {
+            height: 12px;
+            background: #546EA6;
+            border-radius: 20px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay">
+        <h3>Average Ranked Accuracy: <span id="accuracy">Loading...</span>%</h3>
+        <p>Average Ranked Accuracy Goal: 95%</p>
+        <div class="bar">
+            <div class="progress" id="progressBar"></div>
+        </div>
+    </div>
+
+    <script>
+        async function updateAccuracy() {
+            try {
+                const response = await fetch("https://scoresaber.com/api/player/76561198837548711/full");
+                const data = await response.json();
+                const avgacc = parseFloat(data.scoreStats.averageRankedAccuracy.toFixed(2));
+
+                // Update text
+                document.getElementById("accuracy").textContent = avgacc;
+
+                // Normalize between 92% - 95%
+                const minAcc = 92;
+                const maxAcc = 95;
+                let progressPercent = ((avgacc - minAcc) / (maxAcc - minAcc)) * 100;
+                progressPercent = Math.max(0, Math.min(100, progressPercent));
+
+                // Update progress bar
+                document.getElementById("progressBar").style.width = `${progressPercent}%`;
+            } catch (err) {
+                console.error("Failed to fetch ScoreSaber data:", err);
+                document.getElementById("accuracy").textContent = "Error";
+            }
+        }
+
+        updateAccuracy(); // Run once immediately
+        setInterval(updateAccuracy, 10000); // Update every 30s
+    </script>
+</body>
+</html>
